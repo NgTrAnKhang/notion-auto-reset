@@ -1,5 +1,9 @@
 // reset.js
 import { Client } from "@notionhq/client";
+const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
+const MEMBER_USERS = [
+  { name: "Khang", id: "2916d882-db6d-804d-a8e2-ca447c7e30d1" },
+];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
@@ -104,7 +108,38 @@ async function resetData() {
     writeLog("❌ Lỗi khi reset: " + err.message);
   }
 }
+async function notifyUsers(pageId) {
+  const children = MEMBER_USERS.map(({name, id}) => ({
+    type: "paragraph",
+    paragraph: {
+      text: [
+        {
+          type: "mention",
+          mention: {
+            type: "user",
+            user: {
+              id: id,
+            },
+          },
+          plain_text: `@${name}`,
+        },
+        {
+          type: "text",
+          text: {
+            content: " Đã chạy reset thành công!",
+          },
+        },
+      ],
+    },
+  }));
 
+  await notion.blocks.children.append({
+    block_id: pageId,
+    children,
+  });
+
+  writeLog("✅ Đã gửi thông báo đến tất cả thành viên.");
+}
 // 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
   const connected = await testConnection();
@@ -114,4 +149,5 @@ async function resetData() {
   }
 
   await resetData();
-})();
+  await notifyUsers(notificationPageId);
+})(); 
