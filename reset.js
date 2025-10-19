@@ -6,7 +6,7 @@ import fs from "fs";
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
 // 🧩 Danh sách thành viên cố định
-const MEMBER_OPTIONS = ["Khang", "Bờm", "Long", "Huy", "Quân"];
+const MEMBER_OPTIONS = ["Khang", "Bờm", "Bếu", "Huy", "Hải"];
 
 // 📜 Hàm ghi log ra file reset.log
 function writeLog(message) {
@@ -108,6 +108,6 @@ async function resetData() {
     process.exit(1);
   }
 
-  writeLog("🕒 Bot đang chạy — sẽ reset cột 'Thành viên' lúc 23:10 tối Chủ nhật hàng tuần...");
-  cron.schedule("10 23 * * 0", resetData); // 23h10 Chủ nhật
+  writeLog("🕒 Bot đang chạy — sẽ reset cột 'Thành viên' lúc 23:30 tối Chủ nhật hàng tuần...");
+  cron.schedule("30 23 * * 0", resetData); // 23h10 Chủ nhật
 })();
