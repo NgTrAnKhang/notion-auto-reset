@@ -1,0 +1,12 @@
+{
+  "name": "notion-auto-reset",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node reset-notion-weekly.js"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.14",
+    "dotenv": "^16.4.5"
+  }
+}
