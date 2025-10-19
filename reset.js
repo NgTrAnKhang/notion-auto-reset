@@ -108,6 +108,6 @@ async function resetData() {
     process.exit(1);
   }
 
-  writeLog("🕒 Bot đang chạy — sẽ reset cột 'Thành viên' lúc 23:30 tối Chủ nhật hàng tuần...");
-  cron.schedule("30 23 * * 0", resetData); // 23h10 Chủ nhật
+  writeLog("🕒 Bot đang chạy — sẽ reset cột 'Thành viên' lúc 23:35 tối Chủ nhật hàng tuần...");
+  cron.schedule("35 23 * * 0", resetData); 
 })();
