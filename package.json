@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node reset-notion-weekly.js"
+    "reset": "node reset.js"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",

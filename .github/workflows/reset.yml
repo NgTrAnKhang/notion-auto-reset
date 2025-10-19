@@ -1,25 +1,28 @@
-name: Reset Notion Weekly
+name: reset
+
 on:
+  workflow_dispatch: # Cho phép chạy tay
   schedule:
-    - cron: '5 0 * * 0' # UTC cron: chạy CN 00:05 UTC = 07:05 sáng CN ở VN
-  workflow_dispatch: # Cho phép chạy thủ công
+    - cron: '50 16 * * 0' # 23:35 GMT+7 = 16:35 UTC
+
 jobs:
   reset:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Use Node.js
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 18
 
-      - name: Install deps
-        run: npm ci
+      - name: Install dependencies
+        run: npm install
 
       - name: Run reset script
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           DATABASE_ID: ${{ secrets.DATABASE_ID }}
-          DRY_RUN: "false"
-        run: node reset-notion-weekly.js
+        run: npm run reset
