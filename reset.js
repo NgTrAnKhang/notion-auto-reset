@@ -2,7 +2,7 @@
 import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const MEMBER_USERS = [
-  { name: "Khang", id: "22916d882-db6d-8078-bed1-ccbd28787aa8" },
+  { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
 ];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
@@ -160,5 +160,5 @@ async function notifyUsers(pageId) {
   }
   await listUsers();
   await resetData();
-  //await notifyUsers(notificationPageId);
+  await notifyUsers(notificationPageId);
 })(); 
