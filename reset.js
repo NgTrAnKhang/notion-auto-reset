@@ -112,7 +112,7 @@ async function notifyUsers(pageId) {
   const children = MEMBER_USERS.map(({name, id}) => ({
     type: "paragraph",
     paragraph: {
-      text: [
+      rich_text: [
         {
           type: "mention",
           mention: {
