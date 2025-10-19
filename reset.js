@@ -1,5 +1,5 @@
+// reset.js
 import { Client } from "@notionhq/client";
-import cron from "node-cron";
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
@@ -105,7 +105,7 @@ async function resetData() {
   }
 }
 
-// 🚀 Chạy chương trình chính
+// 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
   const connected = await testConnection();
   if (!connected) {
@@ -113,8 +113,5 @@ async function resetData() {
     process.exit(1);
   }
 
-  writeLog(
-    "🕒 Bot đang chạy — sẽ reset cột 'Thành viên' lúc 23:50 tối Chủ nhật hàng tuần..."
-  );
-  cron.schedule("50 23 * * 0", resetData); // Thời gian theo giờ server
+  await resetData();
 })();

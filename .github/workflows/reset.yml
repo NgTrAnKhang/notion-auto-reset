@@ -1,9 +1,10 @@
+# .github/workflows/reset.yml
 name: reset
 
 on:
   workflow_dispatch: # Cho phép chạy tay
   schedule:
-    - cron: '50 16 * * 0' # 23:35 GMT+7 = 16:35 UTC
+    - cron: '56 16 * * 0' # 23:50 GMT+7 = 16:50 UTC Chủ nhật hàng tuần
 
 jobs:
   reset:
