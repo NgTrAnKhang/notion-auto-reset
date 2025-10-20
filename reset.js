@@ -44,7 +44,7 @@ async function getUserIdsFromDatabase(databaseId) {
   const userIds = [];
 
   for (const page of pages.results) {
-    const people = page.properties["Thành viên"]?.people || [];
+    const people = page.properties["Người"]?.people || [];
 
     for (const person of people) {
       if (person.id && !userIds.includes(person.id)) {
