@@ -5,6 +5,8 @@ const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
 ];
 
+const userList = [];
+
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.DATABASE_ID;
