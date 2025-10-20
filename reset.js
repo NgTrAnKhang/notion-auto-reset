@@ -3,7 +3,7 @@ import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
-  //{ name: "Bờm", id: "" },
+  { name: "Bờm", id: "292d872b-594c-8100-8958-00029f7fd61f" },
 ];
 const userList = [];
 
@@ -14,7 +14,7 @@ const DATABASE_ID = process.env.DATABASE_ID;
 const notion = new Client({ auth: NOTION_TOKEN });
 
 // 🧩 Danh sách thành viên cố định
-const MEMBER_OPTIONS = ["Khang", "Bờm", "Bếu", "Huy", "Hải"];
+const MEMBER_OPTIONS = ["Khang lớn", "Bờm", "Bếu", "Huy", "Hải"];
 
 // 📜 Ghi log ra console (không cần ghi file trong GitHub Actions)
 function writeLog(message) {
@@ -34,27 +34,6 @@ async function listUsers() {
   } catch (err) {
     console.error("❌ Lỗi khi lấy danh sách user:", err.message);
   }
-  try {
-  const users = await notion.users.list();
-
-  console.log("\n📋 Danh sách user khả dụng trong workspace:");
-  users.results.forEach((user) => {
-    console.log(`👤 ${user.name} — ID: ${user.id}`);
-
-    // Push vào mảng userList
-    userList.push({
-      name: user.name,
-      id: user.id
-    });
-  });
-
-  // In ra list sau khi đã push xong
-  console.log("\n📦 Dữ liệu đã lưu vào userList:");
-  console.log(userList);
-
-} catch (err) {
-  console.error("❌ Lỗi khi lấy danh sách user:", err.message);
-}
 }
 // 🧠 Kiểm tra kết nối đến Notion
 async function testConnection() {
@@ -143,19 +122,19 @@ async function resetData() {
 }
 async function notifyUsers(pageId) {
   const now = new Date().toLocaleString("vi-VN", {
-  timeZone: "Asia/Ho_Chi_Minh",
-  hour12: false,
-});
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour12: false,
+  });
   const children = MEMBER_USERS.map(({ name, id }) => ({
     type: "paragraph",
     paragraph: {
       rich_text: [
         {
-        type: "text",
-        text: {
-          content: ` — ${now}: `,
+          type: "text",
+          text: {
+            content: ` ${now}: `,
+          },
         },
-      },
         {
           type: "text",
           text: {
