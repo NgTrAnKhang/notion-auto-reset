@@ -1,12 +1,10 @@
 // reset.js
 import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
-const mainPageID="2916d882db6d804eaa96e6c338ab1bea";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
 ];
 
-const userList = [];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
@@ -27,35 +25,16 @@ function writeLog(message) {
 
 async function listUsers() {
   try {
-    const users = await notion.users.list();
-    console.log("\n📋 Danh sách user khả dụng trong workspace:");
-    users.results.forEach((user) => {
-      console.log(`👤 ${user.name} — ID: ${user.id}`);
+    const response = await notion.users.list();
+    console.log("📋 Danh sách user:");
+    response.results.forEach((user) => {
+      if (user.type === "person") {
+        console.log(`👤 ${user.name} — ID: ${user.id} — Email: ${user.person.email}`);
+      }
     });
-  } catch (err) {
-    console.error("❌ Lỗi khi lấy danh sách user:", err.message);
+  } catch (error) {
+    console.error("❌ Lỗi:", error.message);
   }
-  try {
-  const users = await notion.users.list();
-
-  console.log("\n📋 Danh sách user khả dụng trong workspace:");
-  users.results.forEach((user) => {
-    console.log(`👤 ${user.name} — ID: ${user.id}`);
-
-    // Push vào mảng userList
-    userList.push({
-      name: user.name,
-      id: user.id
-    });
-  });
-
-  // In ra list sau khi đã push xong
-  console.log("\n📦 Dữ liệu đã lưu vào userList:");
-  console.log(userList);
-
-} catch (err) {
-  console.error("❌ Lỗi khi lấy danh sách user:", err.message);
-}
 }
 // 🧠 Kiểm tra kết nối đến Notion
 async function testConnection() {
@@ -185,24 +164,6 @@ async function notifyUsers(pageId) {
   writeLog("✅ Đã gửi thông báo đến tất cả thành viên.");
 }
 
-async function listWorkspaceUsers() {
-  try {
-    const users = await notion.users.list();
-
-    const availableUsers = users.results.map((user) => ({
-      name: user.name,
-      id: user.id,
-      type: user.type, // "person" hoặc "bot"
-    }));
-
-    console.log("📋 User khả dụng trong workspace:");
-    availableUsers.forEach((u) =>
-      console.log(`👤 ${u.name} — ID: ${u.id} — Type: ${u.type}`)
-    );
-  } catch (error) {
-    console.error("❌ Lỗi khi lấy danh sách user:", error.message);
-  }
-}
 // 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
   const connected = await testConnection();
@@ -210,7 +171,6 @@ async function listWorkspaceUsers() {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
-  listWorkspaceUsers();
   await listUsers();
   await resetData();
   await notifyUsers(notificationPageId);
