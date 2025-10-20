@@ -3,6 +3,10 @@ import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
+  { name: "Bờm", id: "292d872b-594c-81c4-8334-00029b03970f" },
+  { name: "Luân", id: "292d872b-594c-810b-a245-00024185a41c" },
+  { name: "Huy Vũ", id: "292d872b-594c-810a-a915-00020cc29e5f" },
+  { name: "Danh", id: "292d872b-594c-8152-ae38-000244d0abed" },
 ];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
@@ -13,7 +17,7 @@ const TestDB = "h2926d882db6d8030ad27cacffeb6edde";
 const notion = new Client({ auth: NOTION_TOKEN });
 
 // 🧩 Danh sách thành viên cố định
-const MEMBER_OPTIONS = ["Khang lớn", "Bờm", "Bếu", "Huy", "Hải"];
+const MEMBER_OPTIONS = ["Khang lớn", "Bờm", "Bếu", "Huy Vũ", "Hải","Luân","Danh"];
 
 // 📜 Ghi log ra console (không cần ghi file trong GitHub Actions)
 function writeLog(message) {
