@@ -4,8 +4,8 @@ const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
   { name: "Bờm", id: "292d872b-594c-8100-8958-00029f7fd61f" },
+  { name: "Huy Nguyễn", id: "292d872b-594c-8139-954e-0002159195af" },
 ];
-const userList = [];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
