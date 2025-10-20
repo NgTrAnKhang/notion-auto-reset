@@ -26,40 +26,6 @@ function writeLog(message) {
   });
   console.log(`[${timestamp}] ${message}`);
 }
-
-async function listUsers() {
-  try {
-    const response = await notion.users.list();
-    console.log("📋 Danh sách user:");
-    response.results.forEach((user) => {
-      if (user.type === "person") {
-        console.log(
-          `👤 ${user.name} — ID: ${user.id} — Email: ${user.person.email}`
-        );
-      }
-    });
-  } catch (error) {
-    console.error("❌ Lỗi:", error.message);
-  }
-}
-async function getUserIdsFromDatabase(databaseId) {
-  const pages = await notion.databases.query({ database_id: databaseId });
-
-  const userIds = [];
-
-  for (const page of pages.results) {
-    const people = page.properties["Người"]?.people || [];
-
-    for (const person of people) {
-      if (person.id && !userIds.includes(person.id)) {
-        userIds.push(person.id);
-        console.log(`👤 ${person.name} — ID: ${person.id}`);
-      }
-    }
-  }
-
-  return userIds;
-}
 // 🧠 Kiểm tra kết nối đến Notion
 async function testConnection() {
   writeLog("🔍 Kiểm tra kết nối đến Notion Database...");
@@ -131,32 +97,6 @@ async function resetData() {
     });
 
     for (const page of pages.results) {
-      const properties = page.properties;
-
-      // ✅ Lấy dữ liệu cột "asd"
-      const asdField = properties["asd"];
-      const peopleList = [];
-
-      if (asdField && asdField.type === "people") {
-        asdField.people.forEach((person) => {
-          if (person.object === "user") {
-            peopleList.push({
-              id: person.id,
-              name: person.name,
-            });
-          }
-        });
-
-        // Ghi log
-        writeLog(`👥 Dữ liệu 'asd' trong page ${page.id}:`);
-        peopleList.forEach((p) => {
-          writeLog(`   - ${p.name} (ID: ${p.id})`);
-        });
-      } else {
-        writeLog(`⚠️ Không tìm thấy dữ liệu hợp lệ trong 'asd' cho page ${page.id}`);
-      }
-
-      // 🧹 Reset cột “Thành viên”
       await notion.pages.update({
         page_id: page.id,
         properties: {
@@ -171,6 +111,43 @@ async function resetData() {
     writeLog("❌ Lỗi khi reset: " + err.message);
   }
 }
+// 📥 1. Hàm lấy dữ liệu từ cột "asd"
+async function getFieldData(column) {
+  writeLog("📥 Đang lấy dữ liệu từ cột 'asd'...");
+
+  try {
+    const pages = await notion.databases.query({
+      database_id: DATABASE_ID,
+    });
+
+    for (const page of pages.results) {
+      const properties = page.properties;
+      const asdField = properties[column];
+      const peopleList = [];
+
+      if (asdField && asdField.type === "people") {
+        asdField.people.forEach((person) => {
+          if (person.object === "user") {
+            peopleList.push({
+              id: person.id,
+              name: person.name,
+            });
+          }
+        });
+
+        writeLog(`👥 Dữ liệu 'asd' trong page ${page.id}:`);
+        peopleList.forEach((p) => {
+          writeLog(`   - ${p.name} (ID: ${p.id})`);
+        });
+      } else {
+        writeLog(`⚠️ Không tìm thấy dữ liệu hợp lệ trong 'asd' cho page ${page.id}`);
+      }
+    }
+  } catch (err) {
+    writeLog("❌ Lỗi khi lấy dữ liệu 'asd': " + err.message);
+  }
+}
+
 
 async function notifyUsers(pageId) {
   const now = new Date().toLocaleString("vi-VN", {
