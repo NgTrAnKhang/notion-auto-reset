@@ -142,24 +142,24 @@ async function resetData() {
   }
 }
 async function notifyUsers(pageId) {
+  const now = new Date().toLocaleString("vi-VN", {
+  timeZone: "Asia/Ho_Chi_Minh",
+  hour12: false,
+});
   const children = MEMBER_USERS.map(({ name, id }) => ({
     type: "paragraph",
     paragraph: {
       rich_text: [
-        // {
-        //   type: "mention",
-        //   mention: {
-        //     type: "user",
-        //     user: {
-        //       id: id,
-        //     },
-        //   },
-        //   plain_text: `@${name}`,
-        // },
+        {
+        type: "text",
+        text: {
+          content: ` — ${now}: `,
+        },
+      },
         {
           type: "text",
           text: {
-            content: "Vào vote đi,",
+            content: "Vào vote đi, ",
           },
         },
         {
