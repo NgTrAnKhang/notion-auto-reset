@@ -124,6 +124,22 @@ async function notifyUsers(pageId) {
     type: "paragraph",
     paragraph: {
       rich_text: [
+        // {
+        //   type: "mention",
+        //   mention: {
+        //     type: "user",
+        //     user: {
+        //       id: id,
+        //     },
+        //   },
+        //   plain_text: `@${name}`,
+        // },
+        {
+          type: "text",
+          text: {
+            content: " Vào vote đi,",
+          },
+        },
         {
           type: "mention",
           mention: {
@@ -132,13 +148,7 @@ async function notifyUsers(pageId) {
               id: id,
             },
           },
-          plain_text: `@${name}`,
-        },
-        {
-          type: "text",
-          text: {
-            content: " Đã chạy reset thành công!",
-          },
+          plain_text: `@${name}!`,
         },
       ],
     },
