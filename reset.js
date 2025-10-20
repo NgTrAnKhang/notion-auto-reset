@@ -1,6 +1,7 @@
 // reset.js
 import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
+const mainPageID="2916d882db6d804eaa96e6c338ab1bea";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
 ];
@@ -183,6 +184,25 @@ async function notifyUsers(pageId) {
 
   writeLog("✅ Đã gửi thông báo đến tất cả thành viên.");
 }
+
+async function listWorkspaceUsers() {
+  try {
+    const users = await notion.users.list();
+
+    const availableUsers = users.results.map((user) => ({
+      name: user.name,
+      id: user.id,
+      type: user.type, // "person" hoặc "bot"
+    }));
+
+    console.log("📋 User khả dụng trong workspace:");
+    availableUsers.forEach((u) =>
+      console.log(`👤 ${u.name} — ID: ${u.id} — Type: ${u.type}`)
+    );
+  } catch (error) {
+    console.error("❌ Lỗi khi lấy danh sách user:", error.message);
+  }
+}
 // 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
   const connected = await testConnection();
@@ -190,6 +210,7 @@ async function notifyUsers(pageId) {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
+  listWorkspaceUsers();
   await listUsers();
   await resetData();
   await notifyUsers(notificationPageId);
