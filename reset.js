@@ -5,10 +5,10 @@ const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
 ];
 
-
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.DATABASE_ID;
+const TestDB = "h2926d882db6d8030ad27cacffeb6edde";
 
 const notion = new Client({ auth: NOTION_TOKEN });
 
@@ -29,12 +29,32 @@ async function listUsers() {
     console.log("📋 Danh sách user:");
     response.results.forEach((user) => {
       if (user.type === "person") {
-        console.log(`👤 ${user.name} — ID: ${user.id} — Email: ${user.person.email}`);
+        console.log(
+          `👤 ${user.name} — ID: ${user.id} — Email: ${user.person.email}`
+        );
       }
     });
   } catch (error) {
     console.error("❌ Lỗi:", error.message);
   }
+}
+async function getUserIdsFromDatabase(databaseId) {
+  const pages = await notion.databases.query({ database_id: databaseId });
+
+  const userIds = [];
+
+  for (const page of pages.results) {
+    const people = page.properties["Thành viên"]?.people || [];
+
+    for (const person of people) {
+      if (person.id && !userIds.includes(person.id)) {
+        userIds.push(person.id);
+        console.log(`👤 ${person.name} — ID: ${person.id}`);
+      }
+    }
+  }
+
+  return userIds;
 }
 // 🧠 Kiểm tra kết nối đến Notion
 async function testConnection() {
@@ -171,7 +191,9 @@ async function notifyUsers(pageId) {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
-  await listUsers();
+  getUserIdsFromDatabase(TestDB).then((ids) => {
+    console.log("\n✅ Danh sách ID đã lấy:", ids);
+  });
   await resetData();
   await notifyUsers(notificationPageId);
 })();
