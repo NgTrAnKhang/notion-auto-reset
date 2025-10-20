@@ -3,8 +3,6 @@ import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
-  { name: "Bờm", id: "292d872b-594c-8100-8958-00029f7fd61f" },
-  { name: "Huy Nguyễn", id: "292d872b-594c-8139-954e-0002159195af" },
 ];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
@@ -34,6 +32,27 @@ async function listUsers() {
   } catch (err) {
     console.error("❌ Lỗi khi lấy danh sách user:", err.message);
   }
+  try {
+  const users = await notion.users.list();
+
+  console.log("\n📋 Danh sách user khả dụng trong workspace:");
+  users.results.forEach((user) => {
+    console.log(`👤 ${user.name} — ID: ${user.id}`);
+
+    // Push vào mảng userList
+    userList.push({
+      name: user.name,
+      id: user.id
+    });
+  });
+
+  // In ra list sau khi đã push xong
+  console.log("\n📦 Dữ liệu đã lưu vào userList:");
+  console.log(userList);
+
+} catch (err) {
+  console.error("❌ Lỗi khi lấy danh sách user:", err.message);
+}
 }
 // 🧠 Kiểm tra kết nối đến Notion
 async function testConnection() {
