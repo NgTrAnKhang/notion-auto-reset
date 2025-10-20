@@ -17,7 +17,15 @@ const TestDB = "h2926d882db6d8030ad27cacffeb6edde";
 const notion = new Client({ auth: NOTION_TOKEN });
 
 // 🧩 Danh sách thành viên cố định
-const MEMBER_OPTIONS = ["Khang lớn", "Bờm", "Bếu", "Huy Vũ", "Hải","Luân","Danh"];
+const MEMBER_OPTIONS = [
+  "Khang lớn",
+  "Bờm",
+  "Bếu",
+  "Huy Vũ",
+  "Hải",
+  "Luân",
+  "Danh",
+];
 
 // 📜 Ghi log ra console (không cần ghi file trong GitHub Actions)
 function writeLog(message) {
@@ -140,7 +148,9 @@ async function getFieldData(column) {
           writeLog(`   - ${p.name} (ID: ${p.id})`);
         });
       } else {
-        writeLog(`⚠️ Không tìm thấy dữ liệu hợp lệ trong 'asd' cho page ${page.id}`);
+        writeLog(
+          `⚠️ Không tìm thấy dữ liệu hợp lệ trong 'asd' cho page ${page.id}`
+        );
       }
     }
   } catch (err) {
@@ -148,12 +158,22 @@ async function getFieldData(column) {
   }
 }
 
-
 async function notifyUsers(pageId) {
   const now = new Date().toLocaleString("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
     hour12: false,
   });
+  const existingBlocks = await notion.blocks.children.list({
+    block_id: pageId,
+  });
+
+  for (const block of existingBlocks.results) {
+    try {
+      await notion.blocks.delete({ block_id: block.id });
+    } catch (err) {
+      writeLog(`⚠️ Không thể xoá block ${block.id}: ${err.message}`);
+    }
+  }
   const children = MEMBER_USERS.map(({ name, id }) => ({
     type: "paragraph",
     paragraph: {
