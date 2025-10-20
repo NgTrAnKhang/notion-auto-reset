@@ -3,7 +3,9 @@ import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const MEMBER_USERS = [
   { name: "Khang", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
+  { name: "Bờm", id: "" },
 ];
+const userList = [];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
@@ -32,6 +34,27 @@ async function listUsers() {
   } catch (err) {
     console.error("❌ Lỗi khi lấy danh sách user:", err.message);
   }
+  try {
+  const users = await notion.users.list();
+
+  console.log("\n📋 Danh sách user khả dụng trong workspace:");
+  users.results.forEach((user) => {
+    console.log(`👤 ${user.name} — ID: ${user.id}`);
+
+    // Push vào mảng userList
+    userList.push({
+      name: user.name,
+      id: user.id
+    });
+  });
+
+  // In ra list sau khi đã push xong
+  console.log("\n📦 Dữ liệu đã lưu vào userList:");
+  console.log(userList);
+
+} catch (err) {
+  console.error("❌ Lỗi khi lấy danh sách user:", err.message);
+}
 }
 // 🧠 Kiểm tra kết nối đến Notion
 async function testConnection() {
@@ -61,10 +84,9 @@ async function ensureMemberOptions() {
       database_id: DATABASE_ID,
     });
 
-    const currentOptions =
-      db.properties["Thành viên"].multi_select.options.map(
-        (opt) => opt.name
-      );
+    const currentOptions = db.properties["Thành viên"].multi_select.options.map(
+      (opt) => opt.name
+    );
 
     const missing = MEMBER_OPTIONS.filter(
       (name) => !currentOptions.includes(name)
@@ -120,7 +142,7 @@ async function resetData() {
   }
 }
 async function notifyUsers(pageId) {
-  const children = MEMBER_USERS.map(({name, id}) => ({
+  const children = MEMBER_USERS.map(({ name, id }) => ({
     type: "paragraph",
     paragraph: {
       rich_text: [
@@ -137,7 +159,7 @@ async function notifyUsers(pageId) {
         {
           type: "text",
           text: {
-            content: " Vào vote đi,",
+            content: "Vào vote đi,",
           },
         },
         {
@@ -171,4 +193,4 @@ async function notifyUsers(pageId) {
   await listUsers();
   await resetData();
   await notifyUsers(notificationPageId);
-})(); 
+})();
