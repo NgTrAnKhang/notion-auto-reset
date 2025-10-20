@@ -127,6 +127,32 @@ async function resetData() {
     });
 
     for (const page of pages.results) {
+      const properties = page.properties;
+
+      // ✅ Lấy dữ liệu cột "asd"
+      const asdField = properties["asd"];
+      const peopleList = [];
+
+      if (asdField && asdField.type === "people") {
+        asdField.people.forEach((person) => {
+          if (person.object === "user") {
+            peopleList.push({
+              id: person.id,
+              name: person.name,
+            });
+          }
+        });
+
+        // Ghi log
+        writeLog(`👥 Dữ liệu 'asd' trong page ${page.id}:`);
+        peopleList.forEach((p) => {
+          writeLog(`   - ${p.name} (ID: ${p.id})`);
+        });
+      } else {
+        writeLog(`⚠️ Không tìm thấy dữ liệu hợp lệ trong 'asd' cho page ${page.id}`);
+      }
+
+      // 🧹 Reset cột “Thành viên”
       await notion.pages.update({
         page_id: page.id,
         properties: {
@@ -141,6 +167,7 @@ async function resetData() {
     writeLog("❌ Lỗi khi reset: " + err.message);
   }
 }
+
 async function notifyUsers(pageId) {
   const now = new Date().toLocaleString("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
@@ -191,9 +218,6 @@ async function notifyUsers(pageId) {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
-  getUserIdsFromDatabase(TestDB).then((ids) => {
-    console.log("\n✅ Danh sách ID đã lấy:", ids);
-  });
   await resetData();
   await notifyUsers(notificationPageId);
 })();
