@@ -345,7 +345,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
-  //await getFieldData("User"); //Lấy id user
+  await getFieldData("User"); //Lấy id user
   await resetData(); //Reset data
   // await logAllBlocks(mainPageId); //Lấy các block trong page
   // await deleteChildrenOfHeading(mainPageId,"Thông báo:"); //Xóa thông báo cũ
