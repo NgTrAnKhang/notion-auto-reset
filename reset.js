@@ -57,7 +57,7 @@ async function ensureMemberOptions() {
     });
 
     // Tạo danh sách options có màu
-    const newOptions = MEMBER_USERS.map(user => ({
+    const newOptions = MEMBER_USERS.map((user) => ({
       name: user.name,
       color: user.color || "default", // fallback nếu không có màu
     }));
@@ -106,7 +106,7 @@ async function resetData() {
     writeLog("❌ Lỗi khi reset: " + err.message);
   }
 }
-// 📥 1. Hàm lấy dữ liệu từ cột "asd"
+// 📥 1. Hàm lấy dữ liệu từ cột "column"
 async function getFieldData(column) {
   writeLog("📥 Đang lấy dữ liệu từ cột 'User'...");
 
@@ -146,10 +146,18 @@ async function getFieldData(column) {
 }
 
 async function notifyUsers(pageId, headingText) {
-  const now = new Date().toLocaleString("vi-VN", {
+  const now = new Date().toLocaleString("en-US", {
     timeZone: "Asia/Ho_Chi_Minh",
-    hour12: false,
   });
+
+  const date = new Date(now);
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  const formatted = `${pad(date.getHours())}:${pad(date.getMinutes())} ${pad(
+    date.getDate()
+  )}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+
 
   // Lấy tất cả block trong page
   const blocks = await getAllBlocks(pageId);
@@ -189,7 +197,7 @@ async function notifyUsers(pageId, headingText) {
         {
           type: "text",
           text: {
-            content: `${now}: Vào vote đi, ${name} `,
+            content: `${formatted}: Vào vote đi, ${name} `,
           },
         },
         {
@@ -338,6 +346,6 @@ async function deleteChildrenOfHeading(pageId, headingText) {
   await getFieldData("User"); //Lấy id user
   await resetData(); //Reset data
   await logAllBlocks(mainPageId); //Lấy các block trong page
-  await deleteChildrenOfHeading(mainPageId,"Thông báo:"); //Xóa thông báo cũ
-  await notifyUsers(mainPageId,"Thông báo:"); //Thông báo đến tất cả thành viên
+  await deleteChildrenOfHeading(mainPageId, "Thông báo:"); //Xóa thông báo cũ
+  await notifyUsers(mainPageId, "Thông báo:"); //Thông báo đến tất cả thành viên
 })();
