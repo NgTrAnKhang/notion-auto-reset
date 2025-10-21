@@ -10,6 +10,7 @@ const MEMBER_USERS = [
   { name: "Huy Vũ", id: "292d872b-594c-810a-a915-00020cc29e5f" },
   { name: "Danh", id: "292d872b-594c-8152-ae38-000244d0abed" },
   { name: "Huyo1", id: "292d872b-594c-8139-954e-0002159195af" },
+  { name: "Hẻ", id: "292d872b-594c-81b2-8d11-0002bcbe3ba0" },
 ];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
@@ -17,17 +18,6 @@ const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.DATABASE_ID;
 const listUserDB_ID = "2926d882db6d8030ad27cacffeb6edde";
 const notion = new Client({ auth: NOTION_TOKEN });
-
-// 🧩 Danh sách thành viên cố định
-// const MEMBER_OPTIONS = [
-//   "Khang lớn",
-//   "Bờm",
-//   "Bếu",
-//   "Huy Vũ",
-//   "Hải",
-//   "Luân",
-//   "Danh",
-// ];
 
 // 📜 Ghi log ra console (không cần ghi file trong GitHub Actions)
 function writeLog(message) {
