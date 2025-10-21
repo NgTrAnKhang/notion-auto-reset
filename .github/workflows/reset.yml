@@ -1,29 +1,42 @@
-# .github/workflows/reset.yml
-name: reset
+name: Reset Notion Database
 
 on:
-  workflow_dispatch: # Cho phép chạy tay
+  workflow_dispatch:
+    inputs:
+      function:
+        description: 'Chọn chức năng cần chạy'
+        required: true
+        default: 'reset-data'
+        type: choice
+        options:
+          - reset-data         # Xoá dữ liệu thành viên + cập nhật danh sách
+          - get-users          # Lấy danh sách user từ Notion People
+          - notify-users       # Gửi thông báo cho các user
+          - delete-notify      # Xoá các block con của heading Thông báo
+
   schedule:
-    - cron: '56 16 * * 0' # 23:50 GMT+7 = 16:50 UTC Chủ nhật hàng tuần
+    - cron: '59 16 * * 0'  # Chủ nhật hàng tuần lúc 23:59 GMT+7 (16:59 UTC)
 
 jobs:
-  reset:
+  run-script:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: 🛒 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: 🧰 Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm install
 
-      - name: Run reset script
+      - name: 🚀 Run selected script
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           DATABASE_ID: ${{ secrets.DATABASE_ID }}
-        run: npm run reset
+        run: |
+          echo "🔧 Đang chạy chức năng: ${{ github.event.inputs.function }}"
+          node scripts/index.js ${{ github.event.inputs.function }}
