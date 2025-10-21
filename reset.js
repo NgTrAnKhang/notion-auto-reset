@@ -308,6 +308,6 @@ async function deleteChildrenOfHeading(pageId, headingText) {
   }
   await resetData();
   logAllBlocks(notificationPageId);
-  deleteChildrenOfHeading(notificationPageId,"asd");
+  deleteChildrenOfHeading(notificationPageId,"asd:");
   //await notifyUsers(notificationPageId);
 })();
