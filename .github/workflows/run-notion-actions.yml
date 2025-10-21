@@ -1,0 +1,65 @@
+name: Run Notion Actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      get_users:
+        description: "Lấy danh sách thành viên"
+        type: boolean
+        required: false
+        default: true
+      reset_data:
+        description: "Reset data"
+        type: boolean
+        required: false
+        default: true
+      delete_notify:
+        description: "Xóa thông báo cũ"
+        type: boolean
+        required: false
+        default: true
+      notify_users:
+        description: "Gửi thông báo mới"
+        type: boolean
+        required: false
+        default: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🚀 Run selected Notion actions
+        run: |
+          ACTIONS=""
+          
+          # Duyệt từng checkbox và thêm vào danh sách nếu được bật
+          if [ "${{ github.event.inputs.get_users }}" == "true" ]; then
+            ACTIONS="$ACTIONS get-users"
+          fi
+
+          if [ "${{ github.event.inputs.reset_data }}" == "true" ]; then
+            ACTIONS="$ACTIONS reset-data"
+          fi
+
+          if [ "${{ github.event.inputs.delete_notify }}" == "true" ]; then
+            ACTIONS="$ACTIONS delete-notify"
+          fi
+
+          if [ "${{ github.event.inputs.notify_users }}" == "true" ]; then
+            ACTIONS="$ACTIONS notify-users"
+          fi
+
+          echo "🔹 Các action sẽ chạy: $ACTIONS"
+          node index.js $ACTIONS
