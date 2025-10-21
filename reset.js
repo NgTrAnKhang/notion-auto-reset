@@ -259,7 +259,45 @@ async function logAllBlocks(pageId) {
     console.error("❌ Lỗi khi lấy block:", err);
   }
 }
+async function deleteChildrenOfHeading(pageId, headingText) {
+  const blocks = await getAllBlocks(pageId);
 
+  // Tìm block heading phù hợp
+  const headingBlock = blocks.find(block => {
+    const type = block.type;
+    const richText = block[type]?.rich_text;
+    if (!richText || !Array.isArray(richText)) return false;
+    const content = richText.map(rt => rt.plain_text).join("");
+    return (
+      ["heading_1", "heading_2", "heading_3"].includes(type) &&
+      content.trim().toLowerCase() === headingText.trim().toLowerCase()
+    );
+  });
+
+  if (!headingBlock) {
+    console.log(`❌ Không tìm thấy heading với nội dung: "${headingText}"`);
+    return;
+  }
+
+  console.log(`✅ Tìm thấy heading "${headingText}" (id: ${headingBlock.id})`);
+
+  // Lấy children của heading
+  const children = await getAllBlocks(headingBlock.id);
+
+  if (children.length === 0) {
+    console.log("ℹ️ Heading không có block con.");
+    return;
+  }
+
+  console.log(`🧹 Đang xoá ${children.length} block con:`);
+
+  for (const child of children) {
+    await notion.blocks.delete({ block_id: child.id });
+    console.log(`🗑️ Đã xoá block con: ${child.id}`);
+  }
+
+  console.log(`✅ Đã xoá xong toàn bộ con của heading "${headingText}"`);
+}
 
 // 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
@@ -270,5 +308,6 @@ async function logAllBlocks(pageId) {
   }
   await resetData();
   logAllBlocks(notificationPageId);
+  deleteChildrenOfHeading(notificationPageId,"asd");
   //await notifyUsers(notificationPageId);
 })();
