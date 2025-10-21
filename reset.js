@@ -158,59 +158,74 @@ async function getFieldData(column) {
   }
 }
 
-async function notifyUsers(pageId) {
+async function notifyUsers(pageId, headingText) {
   const now = new Date().toLocaleString("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
     hour12: false,
   });
-  // const existingBlocks = await notion.blocks.children.list({
-  //   block_id: pageId,
-  // });
 
-  // for (const block of existingBlocks.results) {
-  //   try {
-  //     await notion.blocks.delete({ block_id: block.id });
-  //   } catch (err) {
-  //     writeLog(`⚠️ Không thể xoá block ${block.id}: ${err.message}`);
-  //   }
-  // }
-  const children = MEMBER_USERS.map(({ name, id }) => ({
+  // Lấy tất cả block trong page
+  const blocks = await getAllBlocks(pageId);
+
+  // Tìm heading theo nội dung
+  const headingBlock = blocks.find((block) => {
+    const type = block.type;
+    const richText = block[type]?.rich_text;
+    if (!richText || !Array.isArray(richText)) return false;
+    const content = richText.map((rt) => rt.plain_text).join("");
+    return (
+      ["heading_1", "heading_2", "heading_3"].includes(type) &&
+      content.trim().toLowerCase() === headingText.trim().toLowerCase()
+    );
+  });
+
+  if (!headingBlock) {
+    writeLog(`❌ Không tìm thấy heading "${headingText}" trong page.`);
+    return;
+  }
+
+  const headingId = headingBlock.id;
+  writeLog(`✅ Tìm thấy heading "${headingText}" (ID: ${headingId})`);
+
+  // Xoá tất cả block con của heading
+  const children = await getAllBlocks(headingId);
+  for (const child of children) {
+    await notion.blocks.delete({ block_id: child.id });
+    writeLog(`🗑️ Đã xoá block con: ${child.id}`);
+  }
+
+  // Tạo các block mới để thông báo
+  const newBlocks = MEMBER_USERS.map(({ name, id }) => ({
     type: "paragraph",
     paragraph: {
       rich_text: [
         {
           type: "text",
           text: {
-            content: ` ${now}: `,
-          },
-        },
-        {
-          type: "text",
-          text: {
-            content: `Vào vote đi,${name} `,
+            content: `${now}: Vào vote đi, ${name} `,
           },
         },
         {
           type: "mention",
           mention: {
             type: "user",
-            user: {
-              id: id,
-            },
+            user: { id },
           },
-          plain_text: `( @${name} )`,
+          plain_text: `(@${name})`,
         },
       ],
     },
   }));
 
+  // Thêm các block con mới dưới heading
   await notion.blocks.children.append({
-    block_id: pageId,
-    children,
+    block_id: headingId,
+    children: newBlocks,
   });
 
-  writeLog("✅ Đã gửi thông báo đến tất cả thành viên.");
+  writeLog("✅ Đã gửi thông báo mới");
 }
+
 async function getAllBlocks(pageId) {
   let blocks = [];
   let cursor = undefined;
@@ -307,7 +322,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  logAllBlocks(mainPageId);
-  deleteChildrenOfHeading(mainPageId,"Thông báo:");
-  //await notifyUsers(notificationPageId);
+  //logAllBlocks(mainPageId);
+  deleteChildrenOfHeading(notificationPageId,"Thông báo:");
+  await notifyUsers(notificationPageId,"Thông báo:");
 })();
