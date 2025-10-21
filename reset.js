@@ -60,17 +60,19 @@ async function testConnection() {
 // 🔄 Đảm bảo danh sách option “Thành viên” có đầy đủ
 async function ensureMemberOptions() {
   try {
-    writeLog("🔄 Đang cập nhật lại toàn bộ danh sách 'Thành viên' từ MEMBER_USERS...");
+    writeLog("🔄 Đang cập nhật danh sách 'Thành viên' kèm màu...");
 
-    // Lấy database hiện tại
     const db = await notion.databases.retrieve({
       database_id: DATABASE_ID,
     });
 
-    // Tạo danh sách option mới từ MEMBER_USERS
-    const newOptions = MEMBER_USERS.map(user => ({ name: user.name }));
+    // Tạo danh sách options có màu
+    const newOptions = MEMBER_USERS.map(user => ({
+      name: user.name,
+      color: user.color || "default", // fallback nếu không có màu
+    }));
 
-    // Gửi update lên Notion, ghi đè hoàn toàn danh sách cũ
+    // Cập nhật field "Thành viên" với options mới
     await notion.databases.update({
       database_id: DATABASE_ID,
       properties: {
@@ -82,12 +84,11 @@ async function ensureMemberOptions() {
       },
     });
 
-    writeLog("✅ Đã cập nhật xong danh sách 'Thành viên' với các option mới từ MEMBER_USERS.");
+    writeLog("✅ Đã cập nhật xong danh sách 'Thành viên' có màu.");
   } catch (err) {
     writeLog("❌ Lỗi khi cập nhật danh sách thành viên: " + err.message);
   }
 }
-
 
 // 🧹 Reset dữ liệu cột “Thành viên”
 async function resetData() {
