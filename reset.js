@@ -1,6 +1,7 @@
 // reset.js
 import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
+const mainPageId="2916d882db6d804eaa96e6c338ab1bea";
 const MEMBER_USERS = [
   { name: "Khang lớn", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
   { name: "Bờm", id: "292d872b-594c-81c4-8334-00029b03970f" },
@@ -12,7 +13,6 @@ const MEMBER_USERS = [
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.DATABASE_ID;
-const TestDB = "h2926d882db6d8030ad27cacffeb6edde";
 
 const notion = new Client({ auth: NOTION_TOKEN });
 
@@ -307,7 +307,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  logAllBlocks(notificationPageId);
-  deleteChildrenOfHeading(notificationPageId,"asd:");
+  logAllBlocks(mainPageId);
+  deleteChildrenOfHeading(mainPageId,"Thông báo:");
   //await notifyUsers(notificationPageId);
 })();
