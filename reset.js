@@ -322,7 +322,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  //logAllBlocks(mainPageId);
+  logAllBlocks(notificationPageId);
   deleteChildrenOfHeading(notificationPageId,"Thông báo:");
   await notifyUsers(notificationPageId,"Thông báo:");
 })();
