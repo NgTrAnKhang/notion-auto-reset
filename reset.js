@@ -337,7 +337,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
   }
   await getFieldData("User"); //Lấy id user
   await resetData(); //Reset data
-  // await logAllBlocks(mainPageId); //Lấy các block trong page
-  // await deleteChildrenOfHeading(mainPageId,"Thông báo:"); //Xóa thông báo cũ
-  // await notifyUsers(mainPageId,"Thông báo:"); //Thông báo đến tất cả thành viên
+  await logAllBlocks(mainPageId); //Lấy các block trong page
+  await deleteChildrenOfHeading(mainPageId,"Thông báo:"); //Xóa thông báo cũ
+  await notifyUsers(mainPageId,"Thông báo:"); //Thông báo đến tất cả thành viên
 })();
