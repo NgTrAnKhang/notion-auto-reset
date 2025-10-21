@@ -1,7 +1,7 @@
 // reset.js
 import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
-const mainPageId="2916d882db6d804eaa96e6c338ab1bea";
+const mainPageId = "2916d882db6d804eaa96e6c338ab1bea";
 
 const MEMBER_USERS = [
   { name: "Khang lớn", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
@@ -9,24 +9,25 @@ const MEMBER_USERS = [
   { name: "Luân", id: "292d872b-594c-810b-a245-00024185a41c" },
   { name: "Huy Vũ", id: "292d872b-594c-810a-a915-00020cc29e5f" },
   { name: "Danh", id: "292d872b-594c-8152-ae38-000244d0abed" },
+  { name: "Huyo1", id: "292d872b-594c-8139-954e-0002159195af" },
 ];
 
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.DATABASE_ID;
-const listUserDB_ID="2926d882db6d8030ad27cacffeb6edde";
+const listUserDB_ID = "2926d882db6d8030ad27cacffeb6edde";
 const notion = new Client({ auth: NOTION_TOKEN });
 
 // 🧩 Danh sách thành viên cố định
-const MEMBER_OPTIONS = [
-  "Khang lớn",
-  "Bờm",
-  "Bếu",
-  "Huy Vũ",
-  "Hải",
-  "Luân",
-  "Danh",
-];
+// const MEMBER_OPTIONS = [
+//   "Khang lớn",
+//   "Bờm",
+//   "Bếu",
+//   "Huy Vũ",
+//   "Hải",
+//   "Luân",
+//   "Danh",
+// ];
 
 // 📜 Ghi log ra console (không cần ghi file trong GitHub Actions)
 function writeLog(message) {
@@ -59,40 +60,34 @@ async function testConnection() {
 // 🔄 Đảm bảo danh sách option “Thành viên” có đầy đủ
 async function ensureMemberOptions() {
   try {
+    writeLog("🔄 Đang cập nhật lại toàn bộ danh sách 'Thành viên' từ MEMBER_USERS...");
+
+    // Lấy database hiện tại
     const db = await notion.databases.retrieve({
       database_id: DATABASE_ID,
     });
 
-    const currentOptions = db.properties["Thành viên"].multi_select.options.map(
-      (opt) => opt.name
-    );
+    // Tạo danh sách option mới từ MEMBER_USERS
+    const newOptions = MEMBER_USERS.map(user => ({ name: user.name }));
 
-    const missing = MEMBER_OPTIONS.filter(
-      (name) => !currentOptions.includes(name)
-    );
-
-    if (missing.length > 0) {
-      writeLog("➕ Thêm các thành viên còn thiếu: " + missing.join(", "));
-      await notion.databases.update({
-        database_id: DATABASE_ID,
-        properties: {
-          "Thành viên": {
-            multi_select: {
-              options: [
-                ...db.properties["Thành viên"].multi_select.options,
-                ...missing.map((name) => ({ name })),
-              ],
-            },
+    // Gửi update lên Notion, ghi đè hoàn toàn danh sách cũ
+    await notion.databases.update({
+      database_id: DATABASE_ID,
+      properties: {
+        "Thành viên": {
+          multi_select: {
+            options: newOptions,
           },
         },
-      });
-    } else {
-      writeLog("✅ Danh sách thành viên đã đầy đủ.");
-    }
+      },
+    });
+
+    writeLog("✅ Đã cập nhật xong danh sách 'Thành viên' với các option mới từ MEMBER_USERS.");
   } catch (err) {
-    writeLog("❌ Lỗi khi kiểm tra danh sách thành viên: " + err.message);
+    writeLog("❌ Lỗi khi cập nhật danh sách thành viên: " + err.message);
   }
 }
+
 
 // 🧹 Reset dữ liệu cột “Thành viên”
 async function resetData() {
@@ -260,9 +255,9 @@ async function logAllBlocks(pageId) {
       // Lấy nội dung text nếu block có rich_text hoặc title
       let content = "[Không có nội dung]";
       if (block[type]?.rich_text?.length) {
-        content = block[type].rich_text.map(rt => rt.plain_text).join("");
+        content = block[type].rich_text.map((rt) => rt.plain_text).join("");
       } else if (block[type]?.title?.length) {
-        content = block[type].title.map(rt => rt.plain_text).join("");
+        content = block[type].title.map((rt) => rt.plain_text).join("");
       }
 
       console.log(`\n🔹 Block #${index + 1}`);
@@ -270,7 +265,6 @@ async function logAllBlocks(pageId) {
       console.log(`📦 Loại   : ${type}`);
       console.log(`📝 Nội dung : ${content}`);
     });
-
   } catch (err) {
     console.error("❌ Lỗi khi lấy block:", err);
   }
@@ -289,7 +283,9 @@ async function safeDeleteBlock(blockId, retries = 3) {
       return;
     } catch (err) {
       if (err.code === "conflict_error" && attempt < retries) {
-        console.warn(`⚠️ Xung đột khi xoá block ${blockId}, thử lại lần ${attempt}...`);
+        console.warn(
+          `⚠️ Xung đột khi xoá block ${blockId}, thử lại lần ${attempt}...`
+        );
         await delay(500); // chờ 0.5s rồi thử lại
       } else {
         console.error(`❌ Không thể xoá block ${blockId}:`, err.message);
@@ -304,11 +300,11 @@ async function deleteChildrenOfHeading(pageId, headingText) {
   const blocks = await getAllBlocks(pageId);
 
   // Tìm heading
-  const headingBlock = blocks.find(block => {
+  const headingBlock = blocks.find((block) => {
     const type = block.type;
     const richText = block[type]?.rich_text;
     if (!richText || !Array.isArray(richText)) return false;
-    const content = richText.map(rt => rt.plain_text).join("");
+    const content = richText.map((rt) => rt.plain_text).join("");
     return (
       ["heading_1", "heading_2", "heading_3"].includes(type) &&
       content.trim().toLowerCase() === headingText.trim().toLowerCase()
@@ -348,9 +344,9 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
-  await getFieldData("User");
-  //await resetData();
-  // await logAllBlocks(mainPageId);
-  // await deleteChildrenOfHeading(mainPageId,"Thông báo:");
-  // await notifyUsers(mainPageId,"Thông báo:");
+  //await getFieldData("User"); //Lấy id user
+  await resetData(); //Reset data
+  // await logAllBlocks(mainPageId); //Lấy các block trong page
+  // await deleteChildrenOfHeading(mainPageId,"Thông báo:"); //Xóa thông báo cũ
+  // await notifyUsers(mainPageId,"Thông báo:"); //Thông báo đến tất cả thành viên
 })();
