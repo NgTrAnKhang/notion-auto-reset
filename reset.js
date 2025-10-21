@@ -2,6 +2,7 @@
 import { Client } from "@notionhq/client";
 const notificationPageId = "2916d882db6d80408466c2146b15a9dd";
 const mainPageId="2916d882db6d804eaa96e6c338ab1bea";
+
 const MEMBER_USERS = [
   { name: "Khang lớn", id: "291d872b-594c-8197-90f0-0002ee26f5aa" },
   { name: "Bờm", id: "292d872b-594c-81c4-8334-00029b03970f" },
@@ -13,7 +14,7 @@ const MEMBER_USERS = [
 // 🔐 Lấy biến môi trường từ GitHub Secrets
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.DATABASE_ID;
-
+const listUserDB_ID="2926d882db6d8030ad27cacffeb6edde";
 const notion = new Client({ auth: NOTION_TOKEN });
 
 // 🧩 Danh sách thành viên cố định
@@ -121,11 +122,11 @@ async function resetData() {
 }
 // 📥 1. Hàm lấy dữ liệu từ cột "asd"
 async function getFieldData(column) {
-  writeLog("📥 Đang lấy dữ liệu từ cột 'asd'...");
+  writeLog("📥 Đang lấy dữ liệu từ cột 'User'...");
 
   try {
     const pages = await notion.databases.query({
-      database_id: DATABASE_ID,
+      database_id: listUserDB_ID,
     });
 
     for (const page of pages.results) {
@@ -143,18 +144,18 @@ async function getFieldData(column) {
           }
         });
 
-        writeLog(`👥 Dữ liệu 'asd' trong page ${page.id}:`);
+        writeLog(`👥 Dữ liệu 'User' trong page ${page.id}:`);
         peopleList.forEach((p) => {
           writeLog(`   - ${p.name} (ID: ${p.id})`);
         });
       } else {
         writeLog(
-          `⚠️ Không tìm thấy dữ liệu hợp lệ trong 'asd' cho page ${page.id}`
+          `⚠️ Không tìm thấy dữ liệu hợp lệ trong 'User' cho page ${page.id}`
         );
       }
     }
   } catch (err) {
-    writeLog("❌ Lỗi khi lấy dữ liệu 'asd': " + err.message);
+    writeLog("❌ Lỗi khi lấy dữ liệu 'User': " + err.message);
   }
 }
 
@@ -347,8 +348,9 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     writeLog("⚠️ Dừng chương trình vì không kết nối được với Notion.");
     process.exit(1);
   }
-  await resetData();
-  await logAllBlocks(mainPageId);
-  await deleteChildrenOfHeading(mainPageId,"Thông báo:");
-  await notifyUsers(mainPageId,"Thông báo:");
+  await getFieldData("User");
+  //await resetData();
+  // await logAllBlocks(mainPageId);
+  // await deleteChildrenOfHeading(mainPageId,"Thông báo:");
+  // await notifyUsers(mainPageId,"Thông báo:");
 })();
