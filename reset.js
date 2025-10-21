@@ -348,7 +348,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  await logAllBlocks(notificationPageId);
-  await deleteChildrenOfHeading(notificationPageId,"Thông báo:");
-  await notifyUsers(notificationPageId,"Thông báo:");
+  await logAllBlocks(mainPageId);
+  await deleteChildrenOfHeading(mainPageId,"Thông báo:");
+  await notifyUsers(mainPageId,"Thông báo:");
 })();
