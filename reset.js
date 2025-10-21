@@ -211,42 +211,55 @@ async function notifyUsers(pageId) {
 
   writeLog("✅ Đã gửi thông báo đến tất cả thành viên.");
 }
-async function clearChildrenUnderHeading(pageId, headingText) {
-  try {
-    // 1️⃣ Lấy tất cả block trong page
-    const blocks = await notion.blocks.children.list({
+async function getAllBlocks(pageId) {
+  let blocks = [];
+  let cursor = undefined;
+
+  do {
+    const response = await notion.blocks.children.list({
       block_id: pageId,
-      page_size: 100
+      start_cursor: cursor,
+      page_size: 100,
     });
 
-    // 2️⃣ Tìm block heading có text là "Thông báo"
-    const headingBlock = blocks.results.find(b =>
-      (b.heading_1?.rich_text?.[0]?.plain_text === headingText) ||
-      (b.heading_2?.rich_text?.[0]?.plain_text === headingText) ||
-      (b.heading_3?.rich_text?.[0]?.plain_text === headingText)
-    );
+    blocks.push(...response.results);
+    cursor = response.has_more ? response.next_cursor : null;
+  } while (cursor);
 
-    if (!headingBlock) {
-      console.log(`❌ Không tìm thấy heading: ${headingText}`);
-      return;
-    }
+  return blocks;
+}
 
-    // 3️⃣ Lấy các children (block con) của heading đó
-    const children = await notion.blocks.children.list({
-      block_id: headingBlock.id
+/**
+ * In ra tất cả block trong page, kèm ID, loại, và nội dung nếu có
+ */
+async function logAllBlocks(pageId) {
+  try {
+    const blocks = await getAllBlocks(pageId);
+    console.log(`📋 Trang có ${blocks.length} block:`);
+
+    blocks.forEach((block, index) => {
+      const id = block.id;
+      const type = block.type;
+
+      // Lấy nội dung text nếu block có rich_text hoặc title
+      let content = "[Không có nội dung]";
+      if (block[type]?.rich_text?.length) {
+        content = block[type].rich_text.map(rt => rt.plain_text).join("");
+      } else if (block[type]?.title?.length) {
+        content = block[type].title.map(rt => rt.plain_text).join("");
+      }
+
+      console.log(`\n🔹 Block #${index + 1}`);
+      console.log(`🆔 ID     : ${id}`);
+      console.log(`📦 Loại   : ${type}`);
+      console.log(`📝 Nội dung : ${content}`);
     });
 
-    // 4️⃣ Xoá từng child
-    for (const child of children.results) {
-      await notion.blocks.delete({ block_id: child.id });
-      console.log(`🗑️ Đã xoá block: ${child.id}`);
-    }
-
-    console.log(`✅ Đã xoá toàn bộ nội dung dưới "${headingText}"`);
   } catch (err) {
-    console.error("❌ Lỗi:", err);
+    console.error("❌ Lỗi khi lấy block:", err);
   }
 }
+
 
 // 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
@@ -256,6 +269,6 @@ async function clearChildrenUnderHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  clearChildrenUnderHeading(notificationPageId,"asd")
+  logAllBlocks(notificationPageId);
   //await notifyUsers(notificationPageId);
 })();
