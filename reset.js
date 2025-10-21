@@ -256,6 +256,6 @@ async function clearChildrenUnderHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  clearChildrenUnderHeading(notificationPageId,"Thông báo")
+  clearChildrenUnderHeading(notificationPageId,"asd")
   //await notifyUsers(notificationPageId);
 })();
