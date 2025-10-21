@@ -274,10 +274,35 @@ async function logAllBlocks(pageId) {
     console.error("❌ Lỗi khi lấy block:", err);
   }
 }
+// Hàm delay giúp "nghỉ" giữa các thao tác API
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Hàm xóa block an toàn có retry
+async function safeDeleteBlock(blockId, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await notion.blocks.delete({ block_id: blockId });
+      console.log(`🗑️ Đã xoá block con: ${blockId}`);
+      return;
+    } catch (err) {
+      if (err.code === "conflict_error" && attempt < retries) {
+        console.warn(`⚠️ Xung đột khi xoá block ${blockId}, thử lại lần ${attempt}...`);
+        await delay(500); // chờ 0.5s rồi thử lại
+      } else {
+        console.error(`❌ Không thể xoá block ${blockId}:`, err.message);
+        break;
+      }
+    }
+  }
+}
+
+// Hàm chính
 async function deleteChildrenOfHeading(pageId, headingText) {
   const blocks = await getAllBlocks(pageId);
 
-  // Tìm block heading phù hợp
+  // Tìm heading
   const headingBlock = blocks.find(block => {
     const type = block.type;
     const richText = block[type]?.rich_text;
@@ -296,7 +321,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
 
   console.log(`✅ Tìm thấy heading "${headingText}" (id: ${headingBlock.id})`);
 
-  // Lấy children của heading
+  // Lấy các block con
   const children = await getAllBlocks(headingBlock.id);
 
   if (children.length === 0) {
@@ -306,9 +331,10 @@ async function deleteChildrenOfHeading(pageId, headingText) {
 
   console.log(`🧹 Đang xoá ${children.length} block con:`);
 
+  // Xoá lần lượt từng block con một cách an toàn
   for (const child of children) {
-    await notion.blocks.delete({ block_id: child.id });
-    console.log(`🗑️ Đã xoá block con: ${child.id}`);
+    await safeDeleteBlock(child.id);
+    await delay(300); // nghỉ giữa mỗi lần xoá
   }
 
   console.log(`✅ Đã xoá xong toàn bộ con của heading "${headingText}"`);
@@ -322,7 +348,7 @@ async function deleteChildrenOfHeading(pageId, headingText) {
     process.exit(1);
   }
   await resetData();
-  logAllBlocks(notificationPageId);
-  deleteChildrenOfHeading(notificationPageId,"Thông báo:");
+  await logAllBlocks(notificationPageId);
+  await deleteChildrenOfHeading(notificationPageId,"Thông báo:");
   await notifyUsers(notificationPageId,"Thông báo:");
 })();
