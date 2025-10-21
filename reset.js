@@ -163,17 +163,17 @@ async function notifyUsers(pageId) {
     timeZone: "Asia/Ho_Chi_Minh",
     hour12: false,
   });
-  const existingBlocks = await notion.blocks.children.list({
-    block_id: pageId,
-  });
+  // const existingBlocks = await notion.blocks.children.list({
+  //   block_id: pageId,
+  // });
 
-  for (const block of existingBlocks.results) {
-    try {
-      await notion.blocks.delete({ block_id: block.id });
-    } catch (err) {
-      writeLog(`⚠️ Không thể xoá block ${block.id}: ${err.message}`);
-    }
-  }
+  // for (const block of existingBlocks.results) {
+  //   try {
+  //     await notion.blocks.delete({ block_id: block.id });
+  //   } catch (err) {
+  //     writeLog(`⚠️ Không thể xoá block ${block.id}: ${err.message}`);
+  //   }
+  // }
   const children = MEMBER_USERS.map(({ name, id }) => ({
     type: "paragraph",
     paragraph: {
@@ -211,6 +211,42 @@ async function notifyUsers(pageId) {
 
   writeLog("✅ Đã gửi thông báo đến tất cả thành viên.");
 }
+async function clearChildrenUnderHeading(pageId, headingText) {
+  try {
+    // 1️⃣ Lấy tất cả block trong page
+    const blocks = await notion.blocks.children.list({
+      block_id: pageId,
+      page_size: 100
+    });
+
+    // 2️⃣ Tìm block heading có text là "Thông báo"
+    const headingBlock = blocks.results.find(b =>
+      (b.heading_1?.rich_text?.[0]?.plain_text === headingText) ||
+      (b.heading_2?.rich_text?.[0]?.plain_text === headingText) ||
+      (b.heading_3?.rich_text?.[0]?.plain_text === headingText)
+    );
+
+    if (!headingBlock) {
+      console.log(`❌ Không tìm thấy heading: ${headingText}`);
+      return;
+    }
+
+    // 3️⃣ Lấy các children (block con) của heading đó
+    const children = await notion.blocks.children.list({
+      block_id: headingBlock.id
+    });
+
+    // 4️⃣ Xoá từng child
+    for (const child of children.results) {
+      await notion.blocks.delete({ block_id: child.id });
+      console.log(`🗑️ Đã xoá block: ${child.id}`);
+    }
+
+    console.log(`✅ Đã xoá toàn bộ nội dung dưới "${headingText}"`);
+  } catch (err) {
+    console.error("❌ Lỗi:", err);
+  }
+}
 
 // 🚀 Chạy chương trình chính ngay khi workflow chạy
 (async () => {
@@ -220,5 +256,6 @@ async function notifyUsers(pageId) {
     process.exit(1);
   }
   await resetData();
-  await notifyUsers(notificationPageId);
+  clearChildrenUnderHeading(notificationPageId,"Thông báo")
+  //await notifyUsers(notificationPageId);
 })();
