@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "reset": "node reset.js"
+    "reset": "node bin/reset.js"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
