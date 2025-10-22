@@ -51,8 +51,19 @@ export async function run() {
   const runClearNotify = runAll || flags.has('--clear-notify');
   const runNotifyUsers = runAll || flags.has('--notify-users');
 
-  const mainPageId = params.get('--main-page-id') || DEFAULT_MAIN_PAGE_ID;
-  const notificationPageId = params.get('--notification-page-id') || DEFAULT_NOTIFICATION_PAGE_ID;
+  let mainPageId = params.get('--main-page-id') || DEFAULT_MAIN_PAGE_ID;
+  let notificationPageId = params.get('--notification-page-id') || DEFAULT_NOTIFICATION_PAGE_ID;
+
+  // Map special tokens from workflow to actual defaults
+  if (mainPageId === 'env_default_main' || mainPageId === 'use_default') {
+    mainPageId = DEFAULT_MAIN_PAGE_ID;
+  }
+  if (
+    notificationPageId === 'env_default_notification' ||
+    notificationPageId === 'use_default'
+  ) {
+    notificationPageId = DEFAULT_NOTIFICATION_PAGE_ID;
+  }
 
   const connected = await testConnection();
   if (!connected) {

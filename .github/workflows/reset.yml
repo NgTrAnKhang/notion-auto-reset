@@ -29,22 +29,14 @@ on:
         required: false
         default: true
         type: boolean
-      main_page_id:
-        description: 'Select main page ID (optional)'
+      page:
+        description: 'Select target page (main or notification)'
         required: false
         type: choice
-        default: 'use_default'
+        default: 'main'
         options:
-          - 'use_default'
-          - 'env_default_main'
-      notification_page_id:
-        description: 'Select notification page ID (optional)'
-        required: false
-        type: choice
-        default: 'use_default'
-        options:
-          - 'use_default'
-          - 'env_default_notification'
+          - 'main'
+          - 'notification'
   schedule:
     # 23:50 every Sunday Asia/Ho_Chi_Minh = 16:50 UTC Sunday
     - cron: '50 16 * * 0'
@@ -76,6 +68,10 @@ jobs:
           if [ "${{ github.event.inputs.run_list_blocks || true }}" = "true" ]; then ARGS="$ARGS --list-blocks"; fi
           if [ "${{ github.event.inputs.run_clear_notifications || true }}" = "true" ]; then ARGS="$ARGS --clear-notify"; fi
           if [ "${{ github.event.inputs.run_notify_users || true }}" = "true" ]; then ARGS="$ARGS --notify-users"; fi
-          if [ -n "${{ github.event.inputs.main_page_id }}" ]; then ARGS="$ARGS --main-page-id ${{ github.event.inputs.main_page_id }}"; fi
-          if [ -n "${{ github.event.inputs.notification_page_id }}" ]; then ARGS="$ARGS --notification-page-id ${{ github.event.inputs.notification_page_id }}"; fi
+          TARGET="${{ github.event.inputs.page || 'main' }}"
+          if [ "$TARGET" = "main" ]; then
+            ARGS="$ARGS --main-page-id env_default_main"
+          else
+            ARGS="$ARGS --notification-page-id env_default_notification"
+          fi
           node bin/reset.js $ARGS
