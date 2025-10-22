@@ -20,6 +20,36 @@ export async function getAllBlocks(blockId) {
   return blocks;
 }
 
+// Get only top-level children (non-recursive)
+export async function getTopLevelBlocks(blockId) {
+  const response = await notion.blocks.children.list({
+    block_id: blockId,
+    page_size: 100,
+  });
+  return response.results;
+}
+
+function isHeadingWithText(block, text) {
+  const type = block.type;
+  const richText = block[type]?.rich_text;
+  if (!richText || !Array.isArray(richText)) return false;
+  const content = richText.map((rt) => rt.plain_text).join('');
+  return (
+    ['heading_1', 'heading_2', 'heading_3'].includes(type) &&
+    content.trim().toLowerCase() === text.trim().toLowerCase()
+  );
+}
+
+export async function findTopLevelHeading(pageId, headingText) {
+  const blocks = await getTopLevelBlocks(pageId);
+  return blocks.find((b) => isHeadingWithText(b, headingText));
+}
+
+export async function findAnyHeading(pageId, headingText) {
+  const blocks = await getAllBlocks(pageId);
+  return blocks.find((b) => isHeadingWithText(b, headingText));
+}
+
 export async function safeDeleteBlock(blockId, retries = 3) {
   await withRetry(
     () => notion.blocks.delete({ block_id: blockId }),
@@ -36,19 +66,9 @@ export async function safeDeleteBlock(blockId, retries = 3) {
 }
 
 export async function deleteChildrenOfHeading(pageId, headingText) {
-  const blocks = await getAllBlocks(pageId);
-
-  const headingBlock = blocks.find((block) => {
-    const type = block.type;
-    const richText = block[type]?.rich_text;
-    if (!richText || !Array.isArray(richText)) return false;
-    const content = richText.map((rt) => rt.plain_text).join('');
-    return (
-      ['heading_1', 'heading_2', 'heading_3'].includes(type) &&
-      content.trim().toLowerCase() === headingText.trim().toLowerCase()
-    );
-  });
-
+  // Prefer top-level heading; fallback to any match
+  let headingBlock = await findTopLevelHeading(pageId, headingText);
+  if (!headingBlock) headingBlock = await findAnyHeading(pageId, headingText);
   if (!headingBlock) return { found: false, deleted: 0 };
 
   const children = await getAllBlocks(headingBlock.id);

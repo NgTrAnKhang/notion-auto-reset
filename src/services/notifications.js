@@ -1,5 +1,5 @@
 import { notion } from '../notion/client.js';
-import { getAllBlocks } from '../notion/blocks.js';
+import { getAllBlocks, findTopLevelHeading, findAnyHeading } from '../notion/blocks.js';
 import { MEMBER_USERS } from './members.js';
 import { formatNowHHmmDDMMYYYY } from '../utils/time.js';
 import { log } from '../utils/logger.js';
@@ -7,18 +7,9 @@ import { log } from '../utils/logger.js';
 export async function notifyUsersUnderHeading(pageId, headingText) {
   const formatted = formatNowHHmmDDMMYYYY();
 
-  const blocks = await getAllBlocks(pageId);
-  const headingBlock = blocks.find((block) => {
-    const type = block.type;
-    const richText = block[type]?.rich_text;
-    if (!richText || !Array.isArray(richText)) return false;
-    const content = richText.map((rt) => rt.plain_text).join('');
-    return (
-      ['heading_1', 'heading_2', 'heading_3'].includes(type) &&
-      content.trim().toLowerCase() === headingText.trim().toLowerCase()
-    );
-  });
-
+  // Prefer top-level heading; fallback to any match
+  let headingBlock = await findTopLevelHeading(pageId, headingText);
+  if (!headingBlock) headingBlock = await findAnyHeading(pageId, headingText);
   if (!headingBlock) {
     log(`Heading not found: ${headingText}`);
     return false;
