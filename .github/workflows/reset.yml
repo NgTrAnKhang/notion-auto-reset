@@ -30,13 +30,21 @@ on:
         default: true
         type: boolean
       main_page_id:
-        description: 'Override main page ID (optional)'
+        description: 'Select main page ID (optional)'
         required: false
-        type: string
+        type: choice
+        default: 'use_default'
+        options:
+          - 'use_default'
+          - 'env_default_main'
       notification_page_id:
-        description: 'Override notification page ID (optional)'
+        description: 'Select notification page ID (optional)'
         required: false
-        type: string
+        type: choice
+        default: 'use_default'
+        options:
+          - 'use_default'
+          - 'env_default_notification'
   schedule:
     # 23:50 every Sunday Asia/Ho_Chi_Minh = 16:50 UTC Sunday
     - cron: '50 16 * * 0'
