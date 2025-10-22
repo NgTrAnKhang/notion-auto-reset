@@ -51,10 +51,13 @@ export async function logAllBlocks(pageId) {
       const id = block.id;
       const type = block.type;
       let content = '[No content]';
-      if (block[type]?.rich_text?.length) {
-        content = block[type].rich_text.map((rt) => rt.plain_text).join('');
-      } else if (block[type]?.title?.length) {
-        content = block[type].title.map((rt) => rt.plain_text).join('');
+      const data = block[type];
+      if (data?.rich_text && Array.isArray(data.rich_text) && data.rich_text.length) {
+        content = data.rich_text.map((rt) => rt.plain_text).join('');
+      } else if (data?.title && Array.isArray(data.title) && data.title.length) {
+        content = data.title.map((rt) => rt.plain_text).join('');
+      } else if (typeof data?.text === 'string') {
+        content = data.text;
       }
 
       console.log(`\nBlock #${index + 1}`);

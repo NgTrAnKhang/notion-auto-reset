@@ -1,5 +1,6 @@
 {
     "github-actions.workflows.pinned.workflows": [
         ".github/workflows/reset.yml"
-    ]
+    ],
+    "codium.codeCompletion.enable": false
 }
