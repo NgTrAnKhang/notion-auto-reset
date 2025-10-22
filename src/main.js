@@ -85,6 +85,6 @@ export async function run() {
   }
 
   if (runNotifyUsers) {
-    await notifyUsersUnderHeading(notificationPageId || mainPageId, 'Thông báo:');
+    await notifyUsersUnderHeading(mainPageId || notificationPageId, 'Thông báo:');
   }
 }
